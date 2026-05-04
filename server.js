@@ -133,7 +133,10 @@ server.on("upgrade", (req, socket) => {
   });
 
   socket.on("close", () => disconnect(user.id));
-  socket.on("error", () => disconnect(user.id));
+  socket.on("error", (err) => {
+  console.error(err);
+  disconnect(user.id);
+});
 });
 
 server.listen(PORT, () => {
