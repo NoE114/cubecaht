@@ -15,18 +15,20 @@
           <img src="/cube.png" alt="" class="brand__logo">
           <div>
             <h1>Cubechat</h1>
-            <p>invite-only anonymous relay</p>
+            <p>anonymous real-time chat</p>
           </div>
         </div>
-        <label class="theme-control">
-          <span>Theme</span>
-          <select id="themeSelect" aria-label="Theme">
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
-            <option value="arch">Arch</option>
-            <option value="dracula">Dracula</option>
-          </select>
-        </label>
+        <div class="topbar__right">
+          <label class="theme-control">
+            <span>Theme</span>
+            <select id="themeSelect" aria-label="Theme">
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="terminal">Terminal</option>
+              <option value="dracula">Dracula</option>
+            </select>
+          </label>
+        </div>
       </header>
 
       <main class="main-grid">
@@ -46,11 +48,16 @@
                 <span class="channel-kicker">global</span>
                 <h2>The Cube</h2>
               </div>
-              <span id="connectionStatus" class="status-pill">connecting</span>
+              <div class="chat-header__meta">
+                <span id="connectionStatus" class="status-pill">connecting</span>
+              </div>
             </div>
             <div id="messages" class="messages" aria-live="polite"></div>
             <form id="messageForm" class="composer" autocomplete="off">
-              <input id="messageInput" type="text" maxlength="1000" placeholder="Send a message into the cube..." aria-label="Message">
+              <div class="input-shell">
+                <span class="input-caret" aria-hidden="true"></span>
+                <input id="messageInput" type="text" maxlength="1000" placeholder="Send a message into the cube..." aria-label="Message">
+              </div>
               <button type="submit">Send</button>
             </form>
           </div>
@@ -64,12 +71,15 @@
           <span class="channel-kicker">direct</span>
           <h2 id="dmTitle">DM</h2>
         </div>
-        <button id="closeDm" class="icon-button" type="button" aria-label="Close direct messages">x</button>
+        <button id="closeDm" class="icon-button" type="button" aria-label="Close direct messages">×</button>
       </div>
       <p class="dm-policy">Unviewed DMs are discarded on disconnect. Viewed DMs expire after 24 hours.</p>
       <div id="dmMessages" class="dm-messages"></div>
       <form id="dmForm" class="composer composer--dm" autocomplete="off">
-        <input id="dmInput" type="text" maxlength="1000" placeholder="Whisper to this session..." aria-label="Direct message">
+        <div class="input-shell">
+          <span class="input-caret" aria-hidden="true"></span>
+          <input id="dmInput" type="text" maxlength="1000" placeholder="Whisper to this session..." aria-label="Direct message">
+        </div>
         <button type="submit">Send</button>
       </form>
     </section>

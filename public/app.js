@@ -3,7 +3,8 @@ const state = {
   me: null,
   users: [],
   dmPeer: null,
-  dmThreads: new Map()
+  dmThreads: new Map(),
+  unreadDms: new Set()
 };
 
 const els = {
@@ -23,7 +24,9 @@ const els = {
   dmInput: document.querySelector("#dmInput")
 };
 
-const savedTheme = localStorage.getItem("cubechat-theme") || "dark";
+const availableThemes = new Set(["dark", "light", "terminal", "dracula"]);
+const savedThemeValue = localStorage.getItem("cubechat-theme") || "dark";
+const savedTheme = availableThemes.has(savedThemeValue) ? savedThemeValue : "dark";
 document.documentElement.dataset.theme = savedTheme;
 els.themeSelect.value = savedTheme;
 
@@ -40,6 +43,7 @@ els.messageForm.addEventListener("submit", (event) => {
   if (!text) return;
   send({ type: "global-message", text });
   els.messageInput.value = "";
+  setTypingState(els.messageInput, false);
 });
 
 els.dmForm.addEventListener("submit", (event) => {
@@ -48,12 +52,16 @@ els.dmForm.addEventListener("submit", (event) => {
   if (!text || !state.dmPeer) return;
   send({ type: "dm-message", to: state.dmPeer.id, text });
   els.dmInput.value = "";
+  setTypingState(els.dmInput, false);
 });
 
 els.closeDm.addEventListener("click", () => {
   state.dmPeer = null;
   els.dmPanel.hidden = true;
 });
+
+bindTypingState(els.messageInput);
+bindTypingState(els.dmInput);
 
 function connect() {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
@@ -109,6 +117,9 @@ function handlePayload(payload) {
     if (state.dmPeer && isDmForPeer(payload.message, state.dmPeer.id)) {
       renderDmThread();
       send({ type: "dm-opened", peerId: state.dmPeer.id });
+    } else if (payload.message.from.id !== state.me?.id) {
+      state.unreadDms.add(payload.message.from.id);
+      renderUsers();
     }
     return;
   }
@@ -137,6 +148,7 @@ function renderUsers() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "user-button";
+    button.classList.toggle("has-unread", state.unreadDms.has(user.id));
     button.disabled = user.id === state.me?.id;
     button.append(createDot(user.color), document.createTextNode(user.id === state.me?.id ? `${user.name} (you)` : user.name));
     button.addEventListener("click", () => openDm(user));
@@ -148,9 +160,11 @@ function renderUsers() {
 function openDm(user) {
   if (user.id === state.me?.id) return;
   state.dmPeer = user;
+  state.unreadDms.delete(user.id);
   els.dmTitle.textContent = user.name;
   els.dmPanel.hidden = false;
   renderDmThread();
+  renderUsers();
   send({ type: "dm-opened", peerId: user.id });
   setTimeout(() => els.dmInput.focus(), 0);
 }
@@ -239,6 +253,15 @@ function send(payload) {
   if (state.socket?.readyState === WebSocket.OPEN) {
     state.socket.send(JSON.stringify(payload));
   }
+}
+
+function bindTypingState(input) {
+  input.addEventListener("input", () => setTypingState(input, input.value.length > 0));
+  input.addEventListener("blur", () => setTypingState(input, false));
+}
+
+function setTypingState(input, isTyping) {
+  input.closest(".input-shell")?.classList.toggle("is-typing", isTyping);
 }
 
 function setStatus(text, online) {
