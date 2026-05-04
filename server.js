@@ -12,7 +12,7 @@ const ROOT_DIR = __dirname;
 const PUBLIC_DIR = path.join(ROOT_DIR, "public");
 const DATA_DIR = path.join(ROOT_DIR, "data");
 const GLOBAL_MESSAGES_FILE = path.join(DATA_DIR, "global-messages.json");
-const CUBE_IMAGE = path.join(ROOT_DIR, "..", "cube.png");
+const CUBE_IMAGE = path.join(ROOT_DIR, "cube.png");
 
 const users = new Map();
 const sockets = new Map();
